@@ -10,4 +10,4 @@ __pycache__/
 .idea/
 
 # Ignore OS-specific files
-.DS_Store
+.DS_Storeuploads/
