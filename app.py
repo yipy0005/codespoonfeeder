@@ -14,6 +14,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500 MB
 app.config['MAX_FORM_MEMORY_SIZE'] = 500 * 1024 * 1024  # 500 MB
 
+secret_key = os.environ.get('1chltmdgh8503')
 
 @app.before_request
 def log_request_info():
