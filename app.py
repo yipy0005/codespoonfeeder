@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, redirect, url_for
+from flask import Flask, render_template, request, send_file, redirect, url_for, after_this_request
 import os
 import zipfile
 import io
@@ -7,6 +7,7 @@ from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
 import tempfile
 import os
+import shutil  # For removing directories
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
@@ -106,13 +107,42 @@ def process_files(session_id):
     combined_text += project_tree
     combined_text += "\n\n"
 
+    # Function to get comment syntax based on file extension
+    def get_comment_syntax(file_extension):
+        comment_styles = {
+            '.py': '#',
+            '.js': '//',
+            '.java': '//',
+            '.c': '//',
+            '.cpp': '//',
+            '.html': '<!--',  # Remember to close with '-->'
+                # Add more as needed
+            }
+        return comment_styles.get(file_extension, '//')  # Default to '//'
+
+    # Function to check if the path is safe
+    def is_safe_path(basedir, path):
+        return os.path.realpath(path).startswith(os.path.realpath(basedir))
+
     for relative_path in selected_paths:
         file_path = os.path.join(user_folder, relative_path)
         if os.path.isfile(file_path):
+            # Security check
+            if not is_safe_path(user_folder, file_path):
+                print(f"Unsafe file path detected: {file_path}")
+                continue  # Skip unsafe file paths
             try:
-                # Add header before each file's content
-                combined_text += f"// File: {relative_path}\n"
-                combined_text += "//" + "-" * (len(relative_path) + 7) + "\n\n"
+                _, file_extension = os.path.splitext(file_path)
+                comment_syntax = get_comment_syntax(file_extension)
+
+                # Add header with appropriate comment syntax
+                if comment_syntax == '<!--':
+                    combined_text += f"{comment_syntax} File: {relative_path} -->\n"
+                    combined_text += f"{comment_syntax}{'-' * (len(relative_path) + 7)} -->\n\n"
+                else:
+                    combined_text += f"{comment_syntax} File: {relative_path}\n"
+                    combined_text += f"{comment_syntax}{'-' * (len(relative_path) + 7)}\n\n"
+
                 with open(file_path, 'r', encoding='utf-8') as f:
                     combined_text += f.read()
                     combined_text += "\n\n"
@@ -138,8 +168,17 @@ def process_files(session_id):
             zf.write(file_path, os.path.basename(file_path))
     memory_file.seek(0)
 
-    return send_file(memory_file, download_name='output_segments.zip', as_attachment=True)
+    # Schedule the deletion of the user's folder after the response is sent
+    @after_this_request
+    def remove_user_folder(response):
+        try:
+            shutil.rmtree(user_folder)
+            print(f"Deleted user folder: {user_folder}")
+        except Exception as e:
+            print(f"Error deleting user folder {user_folder}: {e}")
+        return response
 
+    return send_file(memory_file, download_name='output_segments.zip', as_attachment=True)
 
 def split_text_by_words(text, word_limit):
     words = text.split()
