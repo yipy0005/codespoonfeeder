@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Code Spoonfeeder</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f7f9fc;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 500;
+            margin-top: 40px;
+        }
+
+        h3 {
+            text-align: center;
+            font-weight: 300;
+            margin-top: 20px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Drag-and-Drop Area Styles */
+        .drop-zone {
+            border: 2px dashed #007BFF;
+            border-radius: 5px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            background-color: #fff;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .drop-zone:hover {
+            background-color: #e9f5ff;
+        }
+
+        .drop-zone.highlight {
+            border-color: #0056b3;
+        }
+
+        .drop-zone input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Drop Zone Text */
+        #dropZoneText {
+            font-size: 18px;
+            color: #555;
+        }
+
+        /* Button Styles */
+        #uploadButton {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #007BFF;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 500;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #uploadButton:hover {
+            background-color: #0056b3;
+        }
+
+        #uploadButton:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* Spinner and Text Container */
+        .spinner-container {
+            display: none;  /* Hidden by default */
+            margin-top: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Class to display the spinner */
+        .spinner-container.show {
+            display: flex;
+        }
+
+        /* Spinner Styles */
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007BFF; /* Blue color */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Loading Text Style */
+        .loading-text {
+            margin-left: 15px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Privacy Message */
+        .privacy-message {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #777;
+            text-align: center;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 24px;
+            }
+
+            #uploadButton {
+                font-size: 16px;
+            }
+
+            .loading-text {
+                font-size: 16px;
+            }
+        }
+    </style>
+    <script type="text/javascript">
+        (function (f, b) { if (!b.__SV) { var e, g, i, h; window.mixpanel = b; b._i = []; b.init = function (e, f, c) { function g(a, d) { var b = d.split("."); 2 == b.length && ((a = a[b[0]]), (d = b[1])); a[d] = function () { a.push([d].concat(Array.prototype.slice.call(arguments, 0))); }; } var a = b; "undefined" !== typeof c ? (a = b[c] = []) : (c = "mixpanel"); a.people = a.people || []; a.toString = function (a) { var d = "mixpanel"; "mixpanel" !== c && (d += "." + c); a || (d += " (stub)"); return d; }; a.people.toString = function () { return a.toString(1) + ".people (stub)"; }; i = "disable time_event track track_pageview track_links track_forms track_with_groups add_group set_group remove_group register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking start_batch_senders people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user people.remove".split( " "); for (h = 0; h < i.length; h++) g(a, i[h]); var j = "set set_once union unset remove delete".split(" "); a.get_group = function () { function b(c) { d[c] = function () { call2_args = arguments; call2 = [c].concat(Array.prototype.slice.call(call2_args, 0)); a.push([e, call2]); }; } for ( var d = {}, e = ["get_group"].concat( Array.prototype.slice.call(arguments, 0)), c = 0; c < j.length; c++) b(j[c]); return d; }; b._i.push([e, f, c]); }; b.__SV = 1.2; e = f.createElement("script"); e.type = "text/javascript"; e.async = !0; e.src = "undefined" !== typeof MIXPANEL_CUSTOM_LIB_URL ? MIXPANEL_CUSTOM_LIB_URL : "file:" === f.location.protocol && "//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//) ? "https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js" : "//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js"; g = f.getElementsByTagName("script")[0]; g.parentNode.insertBefore(e, g); } })(document, window.mixpanel || []);
+    </script>
+    <script type="text/javascript">
+        mixpanel.init("09039bf2cad94b98963e8bb58379d028");
+
+        // Track page view
+        mixpanel.track("Page View", {
+            "Page Name": "Index",
+            "Page URL": window.location.href
+        });
+    </script>
+</head>
+<body>
+    <h1>🥄 Code Spoonfeeder</h1>
+    <h3>Combine all codes in a project folder into a single text file. (500MB limit)</h3>
+    <div class="container">
+        <form id="uploadForm">
+            <!-- Drag-and-Drop Area -->
+            <div id="dropZone" class="drop-zone">
+                <p id="dropZoneText">Drag and drop your project folder here, or click to select.</p>
+                <input type="file" id="folderInput" webkitdirectory directory multiple>
+            </div>
+            <input type="submit" value="Upload" id="uploadButton" disabled>
+            <!-- Spinner and Loading Text -->
+            <div id="spinnerContainer" class="spinner-container">
+                <div id="spinner" class="spinner"></div>
+                <div id="loadingText" class="loading-text">Loading files...</div>
+            </div>
+        </form>
+        <!-- Privacy Message -->
+        <p class="privacy-message">We do not store any files. All processing is done securely and your files are immediately deleted after processing.</p>
+    </div>
+    <div class="footer">
+        &copy; 2024 Code Spoonfeeder
+        <div>
+            email: assistant.count@aiflowmail.com
+        </div>
+    </div>
+
+    <!-- Include JSZip -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+
+    <!-- Your JavaScript code -->
+    <script>
+        const form = document.getElementById('uploadForm');
+        const dropZone = document.getElementById('dropZone');
+        const folderInput = document.getElementById('folderInput');
+        const spinnerContainer = document.getElementById('spinnerContainer');
+        const uploadButton = document.getElementById('uploadButton');
+        const dropZoneText = document.getElementById('dropZoneText');
+        let filesList = [];
+
+        // Drag-and-Drop Event Handlers
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropZone.classList.add('highlight');
+        }
+
+        function unhighlight(e) {
+            dropZone.classList.remove('highlight');
+        }
+
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            let dt = e.dataTransfer;
+            let items = dt.items;
+
+            processItems(items);
+            // Extract and display the folder name
+            let folderName = getFolderNameFromItems(items);
+            if (folderName) {
+                dropZoneText.textContent = `Folder selected: ${folderName}`;
+            }
+        }
+
+        function processItems(items) {
+            filesList = []; // Reset the filesList
+
+            for (let i = 0; i < items.length; i++) {
+                let item = items[i].webkitGetAsEntry();
+                if (item) {
+                    traverseFileTree(item);
+                }
+            }
+        }
+
+        function traverseFileTree(item, path = '') {
+            if (item.isFile) {
+                item.file(function(file) {
+                    file.fullPath = path + file.name;
+                    filesList.push(file);
+                    if (filesList.length > 0) {
+                        uploadButton.disabled = false; // Enable the upload button
+                    }
+                });
+            } else if (item.isDirectory) {
+                let dirReader = item.createReader();
+                dirReader.readEntries(function(entries) {
+                    for (let i = 0; i < entries.length; i++) {
+                        traverseFileTree(entries[i], path + item.name + "/");
+                    }
+                });
+            }
+        }
+        function getFolderNameFromItems(items) {
+            for (let i = 0; i < items.length; i++) {
+                let item = items[i].webkitGetAsEntry();
+                if (item && item.isDirectory) {
+                    return item.name;
+                } else if (item && item.isFile) {
+                    let pathParts = item.fullPath.split('/');
+                    if (pathParts.length > 1) {
+                        return pathParts[1]; // Assuming the first part is '/'
+                    }
+                }
+            }
+            return null;
+        }
+
+        function getFolderNameFromPath(path) {
+            let pathParts = path.split('/');
+            if (pathParts.length > 1) {
+                return pathParts[0];
+            }
+            return null;
+        }
+
+        // Handle click to select
+        folderInput.addEventListener('change', function(event) {
+            filesList = []; // Reset the filesList
+            let files = folderInput.files;
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                filesList.push(file);
+            }
+            if (filesList.length > 0) {
+                uploadButton.disabled = false; // Enable the upload button
+
+                // Extract and display the folder name
+                let folderName = getFolderNameFromPath(files[0].webkitRelativePath);
+                if (folderName) {
+                    dropZoneText.textContent = `Folder selected: ${folderName}`;
+                }
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+            spinnerContainer.classList.add('show');  // Show the spinner and text
+
+            const zip = new JSZip();
+            mixpanel.track("Upload Submitted", {
+                "Folder Name": dropZoneText.textContent.replace('Folder selected: ', '') || 'Unknown',
+                "Timestamp": new Date().toISOString()
+            });
+
+            for (let i = 0; i < filesList.length; i++) {
+                const file = filesList[i];
+                const path = file.fullPath || file.webkitRelativePath || file.name;
+                zip.file(path, file);
+            }
+
+            zip.generateAsync({ type: 'blob' }).then(function(content) {
+                const formData = new FormData();
+                formData.append('project_zip', content, 'project.zip');
+
+                fetch('/upload_zip', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    spinnerContainer.classList.remove('show');  // Hide the spinner and text
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        alert('Upload failed.');
+                    }
+                }).catch(error => {
+                    spinnerContainer.classList.remove('show');  // Hide the spinner and text
+                    console.error('Error:', error);
+                    alert('An error occurred during the upload.');
+                });
+            }).catch(error => {
+                spinnerContainer.classList.remove('show');  // Hide the spinner and text
+                console.error('Error during zipping:', error);
+                alert('An error occurred during zipping.');
+            });
+        });
+    </script>
+</body>
+</html>
