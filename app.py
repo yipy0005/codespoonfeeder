@@ -6,6 +6,7 @@ import uuid
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
 import tempfile
+import os
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
@@ -143,5 +144,6 @@ def upload_zip():
 def handle_large_file(error):
     return "File is too large. Please upload a file smaller than 100 MB.", 413
 
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
