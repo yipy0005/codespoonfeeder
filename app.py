@@ -25,6 +25,27 @@ def stream_factory(total_content_length, content_type, filename, content_length=
     temp_file = tempfile.NamedTemporaryFile('wb+', delete=False)
     return temp_file
 
+def generate_project_tree(root_dir):
+    tree_lines = []
+    prefix = ''
+    depth_limit = 2
+
+    def walk(dir_path, prefix, depth):
+        if depth > depth_limit:
+            return
+        items = sorted(os.listdir(dir_path))
+        for index, item in enumerate(items):
+            path = os.path.join(dir_path, item)
+            connector = '└── ' if index == len(items) - 1 else '├── '
+            tree_lines.append(f"{prefix}{connector}{item}")
+            if os.path.isdir(path):
+                extension = '    ' if index == len(items) - 1 else '│   '
+                walk(path, prefix + extension, depth + 1)
+
+    tree_lines.append(os.path.basename(root_dir))
+    walk(root_dir, '', 1)
+    return '\n'.join(tree_lines)
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -79,15 +100,26 @@ def process_files(session_id):
     user_folder = os.path.join(app.config['UPLOAD_FOLDER'], session_id)
     combined_text = ''
 
+    # Generate the project tree and append it to combined_text
+    project_tree = generate_project_tree(user_folder)
+    combined_text += "Project Structure:\n"
+    combined_text += project_tree
+    combined_text += "\n\n"
+
     for relative_path in selected_paths:
         file_path = os.path.join(user_folder, relative_path)
         if os.path.isfile(file_path):
             try:
+                # Add header before each file's content
+                combined_text += f"// File: {relative_path}\n"
+                combined_text += "//" + "-" * (len(relative_path) + 7) + "\n\n"
                 with open(file_path, 'r', encoding='utf-8') as f:
-                    combined_text += f.read() + '\n'
+                    combined_text += f.read()
+                    combined_text += "\n\n"
             except Exception as e:
                 print(f"Error reading {file_path}: {e}")
 
+    # Split the combined text into segments of 5000 words
     segments = split_text_by_words(combined_text, 5000)
 
     output_folder = os.path.join(user_folder, 'output')
@@ -106,7 +138,6 @@ def process_files(session_id):
             zf.write(file_path, os.path.basename(file_path))
     memory_file.seek(0)
 
-    # Updated line using download_name instead of attachment_filename
     return send_file(memory_file, download_name='output_segments.zip', as_attachment=True)
 
 
